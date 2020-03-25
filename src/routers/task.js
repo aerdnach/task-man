@@ -31,8 +31,6 @@ router.get('/tasks', async (req, res) => {
 })
 
 router.get('/tasks/:id', async (req, res) => {
-    const requetedUpdates = Object.keys(req.body)
-    const allowedField = ["name", "email", "age", "password"]
     console.log('GET /tasks/:id received data ' + JSON.stringify(req.params))
     
     if (!mongoose.isValidMongooseId(req.params.id)) {
@@ -59,9 +57,9 @@ router.get('/tasks/:id', async (req, res) => {
 router.patch('/tasks/:id', async (req, res) => {
     console.log('PATCH /tasks/:id received data ' + JSON.stringify(req.params))
     
-    const requetedUpdates = Object.keys(req.body)
-    const allowedField = ["name", "email", "age", "password"]
-    const isAllowedUpdate = requetedUpdates.every((update) => allowedField.includes(update))
+    const requestedUpdates = Object.keys(req.body)
+    const allowedField = ['description', 'completed']
+    const isAllowedUpdate = requestedUpdates.every((update) => allowedField.includes(update))
 
     if (!isAllowedUpdate) {
         console.log('PATCH /users/:id invalid updates')
@@ -74,7 +72,9 @@ router.patch('/tasks/:id', async (req, res) => {
     }
 
     try {
-        const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true})
+        const task = await Task.findById(req.params.id)
+        allowedField.forEach((update) => task[update] = req.body[update])
+        await task.save()
 
         if (!task) {
             return res.status(404).send('Task not found')

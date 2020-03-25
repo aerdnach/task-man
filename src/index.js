@@ -9,8 +9,6 @@ app.use(express.json())
 app.use(userRouter)
 app.use(taskRouter)
 
-// Launch server
-
 app.listen(port, () => {
     console.log('Server up and running on port ' + port)
 })
