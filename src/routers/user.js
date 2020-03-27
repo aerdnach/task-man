@@ -5,6 +5,8 @@ const sharp = require('sharp')
 const router = new express.Router()
 const authMdw = require('../middleware/auth.js')
 const User = require('../models/user.js')
+const { sendWelcomeEmail, sendCancelationEmail } = require('../emails/account')
+
 
 const upload = multer({
     limits: {
@@ -119,6 +121,7 @@ router.post('/users', async (req, res) => {
     
     try{
         await user.save()
+        sendWelcomeEmail(user.email, user.name)
         const token = await user.generateAuthToken()
         console.log(req.method + ' ' + req.path + ' response data: ' + JSON.stringify({user, token}))
         res.status(201).send({user, token})
@@ -160,7 +163,8 @@ router.delete('/users/me', authMdw, async (req, res) => {
     console.log(req.method + ' ' + req.path + ' received data ' + JSON.stringify(req.body))
     
     try {
-        await req.user.remove()        
+        await req.user.remove()  
+        sendCancelationEmail(req.user.email, req.user.name)      
         console.log(req.method + ' ' + req.path + ' response data' + JSON.stringify(req.user))
         res.send("deleted user " + req.user.name)
     } catch (e) {
