@@ -23,7 +23,7 @@ const upload = multer({
 
 // Upload avatar
 
-router.post('/users/me/avatar', authMdw, upload.single('avatar'), async (req, res) => {
+router.post('/avatar', authMdw, upload.single('avatar'), async (req, res) => {
     const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
     req.user.avatar = buffer
     await req.user.save()
@@ -32,7 +32,7 @@ router.post('/users/me/avatar', authMdw, upload.single('avatar'), async (req, re
     res.status(400).send({ error: error.message })
 })
 
-router.delete('/users/me/avatar', authMdw, async (req, res) => {
+router.delete('/avatar', authMdw, async (req, res) => {
     req.user.avatar = undefined
     await req.user.save()
     res.send()
@@ -40,7 +40,7 @@ router.delete('/users/me/avatar', authMdw, async (req, res) => {
 
 // Get Avatar
 
-router.get('/users/:id/avatar', async (req, res) => {
+router.get('/avatar/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id)
 
@@ -57,7 +57,7 @@ router.get('/users/:id/avatar', async (req, res) => {
 
 // Delete avatar
 
-router.delete('/users/me/avatar', authMdw, async (req, res) => {
+router.delete('/avatar', authMdw, async (req, res) => {
     req.user.avatar = undefined
     await req.user.save()
     res.send()
@@ -65,7 +65,7 @@ router.delete('/users/me/avatar', authMdw, async (req, res) => {
 
 // Login user
 
-router.post('/users/login', async (req, res) => {
+router.post('/login', async (req, res) => {
     console.log(req.method + ' ' + req.path + ' received data ' + JSON.stringify(req.body))
 
     try {
@@ -82,7 +82,7 @@ router.post('/users/login', async (req, res) => {
 
 // Logout user
 
-router.post('/users/logout', authMdw, async (req, res) => {
+router.post('/logout', authMdw, async (req, res) => {
     console.log(req.method + ' ' + req.path + ' received data ' + JSON.stringify(req.body))
 
     try {
@@ -99,12 +99,13 @@ router.post('/users/logout', authMdw, async (req, res) => {
 
 // Logout user from all sessions
 
-router.post('/users/logoutall', authMdw, async (req, res) => {
+router.post('/logoutall', authMdw, async (req, res) => {
     console.log(req.method + ' ' + req.path + ' received data ' + JSON.stringify(req.body))
 
     try  {
         req.user.tokens = []
         await req.user.save()
+
         console.log(req.method + ' ' + req.path + ' logout done for user ' + req.user._id + ' ' + req.user.name)
         res.send('logout done for all sessions for user ' + req.user._id + ' ' + req.user.name)
     } catch (e) {
@@ -115,7 +116,7 @@ router.post('/users/logoutall', authMdw, async (req, res) => {
 
 // Create user 
 
-router.post('/users', async (req, res) => {
+router.post('/user', async (req, res) => {
     console.log(req.method + ' ' + req.path + ' received data' + JSON.stringify(req.body))
     const user = new User(req.body)
     
@@ -133,7 +134,7 @@ router.post('/users', async (req, res) => {
 
 // Update logged user
 
-router.patch('/users/me', authMdw, async (req, res) => {
+router.patch('/user', authMdw, async (req, res) => {
     console.log(req.method + ' ' + req.path + ' received data ' + JSON.stringify(req.body))
 
     const requestedUpdates = Object.keys(req.body)
@@ -159,7 +160,7 @@ router.patch('/users/me', authMdw, async (req, res) => {
 
 // Delete logged user
 
-router.delete('/users/me', authMdw, async (req, res) => {
+router.delete('/user', authMdw, async (req, res) => {
     console.log(req.method + ' ' + req.path + ' received data ' + JSON.stringify(req.body))
     
     try {
@@ -175,7 +176,7 @@ router.delete('/users/me', authMdw, async (req, res) => {
 
 // Get logged in user
 
-router.get('/users/me', authMdw, async (req, res) => {
+router.get('/user', authMdw, async (req, res) => {
     console.log(req.method + '  ' + req.path + ' received data' + JSON.stringify(req.body))
 
     try {
@@ -184,110 +185,6 @@ router.get('/users/me', authMdw, async (req, res) => {
     } catch (e) {
         console.log(req.method + ' ' + req.path + ' error: ' + e)
         res.status(500).send(e)
-    }
-})
-
-// Get all users
-
-router.get('/users', authMdw, async (req, res) => {
-    console.log(req.method + ' ' + req.path + ' received data' + JSON.stringify(req.body))
-
-    try {
-        const users = await User.find({})
-        console.log(req.method + ' ' + req.path + ' response data' + JSON.stringify(users))
-        res.send(users)
-    } catch (e) {
-        console.log(req.method + ' ' + req.path + ' error: ' + e)
-        res.status(500).send(e)
-    }
-})
-
-// Get User by ID
-
-router.get('/users/:id', authMdw, async (req, res) => {
-    console.log(req.method + ' ' + req.path + ' received data ' + JSON.stringify(req.params))
-    
-    if (!mongoose.isValidMongooseId(req.params.id)) {
-        console.log(req.method + ' ' + req.path + ' cannot retrieve ' + req.params.id)
-        return res.status(400).send('cannot retrieve user')
-    }
-    
-    try {
-        const user = await User.findById(req.params.id)
-
-        if (!user) {
-            console.log(req.method + ' ' + req.path +  ' cannot retrieve ' + req.params.id)
-            return res.status(400).send('cannot retrieve user')
-        }
-
-        console.log(req.method + ' ' + req.path +  ' response data' + JSON.stringify(user))
-        res.send(user)
-    } catch (e) {
-        console.log(req.method + ' ' + req.path +  ' error: ' + e)
-        res.status(500).send(e)
-    }
-})
-
-// Update user by ID
-
-router.patch('/users/:id', authMdw, async (req, res) => {
-    console.log(req.method + ' ' + req.path + ' ' + JSON.stringify(req.params))
-    
-    const requestedUpdates = Object.keys(req.body)
-    const allowedField = ['name', 'email', 'age', 'password']
-    const isAllowedUpdate = requestedUpdates.every((update) => allowedField.includes(update))
-
-    if (!isAllowedUpdate) {
-        console.log(req.method + ' /users/:id invalid updates')
-        return res.status(400).send('Invalid Updates')   
-    }
-
-    if (!mongoose.isValidMongooseId(req.params.id)) {
-        console.log(req.method + ' ' + req.path + ' cannot retrieve ' + req.params.id)
-        return res.status(400).send('cannot retrieve user')
-    }
-
-    try {
-        const user = await User.findById(req.params.id)
-        allowedField.forEach((update) => user[update] = req.body[update])
-        await user.save()
-
-        if (!user) {
-            console.log(req.method + ' ' + req.path + ' cannot retrieve ' + req.params.id)
-            return res.status(404).send('User not found')
-        }
-
-        console.log(req.method + ' ' + req.path + ' response data' + JSON.stringify(user))
-        res.send(user)
-    } catch (e) {
-        console.log(req.method + ' ' + req.path + ' error: ' + e)
-        res.status(400).send(e)
-    }
-})
-
-// Delete User By ID
-
-router.delete('/users/:id', authMdw, async (req, res) => {
-    console.log(req.method + ' ' + req.path + ' received data ' + JSON.stringify(req.params))
-    
-    if (!mongoose.isValidMongooseId(req.params.id)) {
-        console.log(req.method + ' ' + req.path + ' cannot retrieve ' + req.params.id)
-        return res.status(400).send('cannot retrieve user')
-    }
-    
-    try {
-        const user = await User.findByIdAndDelete(req.params.id)
-
-        if (!user) {
-            console.log(req.method + ' ' + req.path + ' cannot retrieve user ' + req.params.id)
-            return res.status(404).send('User not found')
-        }
-        
-        console.log(req.method + ' ' + req.path + ' response data' + JSON.stringify(user))
-        res.send(user)
-    } catch (e) {
-        console.log(req.method + ' ' + req.path + ' error: ' + e)
-        res.status(400).send(e)
     }
 })
 

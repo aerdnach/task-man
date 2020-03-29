@@ -6,7 +6,7 @@ const Task = require('../models/task.js')
 
 // Create Task
 
-router.post('/tasks', authMdw, async (req, res) => {
+router.post('/task', authMdw, async (req, res) => {
     console.log('POST ' + req.path + ' received data' + JSON.stringify(req.body))
     
     const task = new Task({
@@ -30,7 +30,7 @@ router.post('/tasks', authMdw, async (req, res) => {
 // GET /tasks?limit=10&skip=20
 // GET /tasks?sortBy=createdAt:desc
 
-router.get('/tasks', authMdw, async (req, res) => {
+router.get('/task', authMdw, async (req, res) => {
     const match = {}
     const sort = {}
 
@@ -66,7 +66,7 @@ router.get('/tasks', authMdw, async (req, res) => {
 
 // Get Task By ID for logged user
 
-router.get('/tasks/:id', authMdw, async (req, res) => {
+router.get('/task/:id', authMdw, async (req, res) => {
     console.log(req.method + ' ' + req.path + ' received data ' + JSON.stringify(req.params))
     
     if (!mongoose.isValidMongooseId(req.params.id)) {
@@ -92,7 +92,7 @@ router.get('/tasks/:id', authMdw, async (req, res) => {
 
 // Update task by ID for logged user
 
-router.patch('/tasks/:id', authMdw, async (req, res) => {
+router.patch('/task/:id', authMdw, async (req, res) => {
     console.log(req.method + ' ' + req.path + ' received data ' + JSON.stringify(req.params))
     
     const requestedUpdates = Object.keys(req.body)
@@ -129,7 +129,7 @@ router.patch('/tasks/:id', authMdw, async (req, res) => {
 
 // Delete task by ID for logged user  
 
-router.delete('/tasks/:id', authMdw, async (req, res) => {
+router.delete('/task/:id', authMdw, async (req, res) => {
     console.log(req.method + ' ' + req.path + ' received data ' + JSON.stringify(req.params))
     
     if (!mongoose.isValidMongooseId(req.params.id)) {
