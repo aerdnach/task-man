@@ -147,7 +147,7 @@ router.patch('/user', authMdw, async (req, res) => {
     }
 
     try {
-        allowedField.forEach((update) => req.user[update] = req.body[update])
+        requestedUpdates.forEach((update) => req.user[update] = req.body[update])
         await req.user.save()
 
         console.log(req.method + ' ' + req.path + ' response data' + JSON.stringify(req.user))
